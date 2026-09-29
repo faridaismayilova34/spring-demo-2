@@ -1,5 +1,7 @@
 package org.example.springdemo2.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.springdemo2.mapper.TeacherMapper;
 import org.example.springdemo2.model.Teacher;
 import org.example.springdemo2.repository.TeacherRepository;
@@ -8,70 +10,31 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class TeacherService {
 
     private final TeacherRepository teacherRepository;
     private final TeacherMapper teacherMapper;
 
-    public TeacherService(TeacherRepository teacherRepository, TeacherMapper teacherMapper) {
-        this.teacherRepository = teacherRepository;
-        this.teacherMapper = teacherMapper;
-    }
-
     @Transactional(readOnly = true)
     public Optional<Teacher> getTeacherById(Long id) {
-        return teacherRepository.findById(id)
-                .map(teacherMapper::toDto);
+        log.info("getTeacherById start - id: {}", id);
+
+        try {
+            Optional<Teacher> teacher = teacherRepository.findById(id)
+                    .map(teacherMapper::toDto);
+
+            if (teacher.isEmpty()) {
+                log.warn("getTeacherById - Teacher not found with id: {}", id);
+            }
+
+            log.info("getTeacherById end - id: {}", id);
+            return teacher;
+        } catch (Exception e) {
+            log.error("getTeacherById error - id: {}, message: {}", id, e.getMessage(), e);
+            throw e;
+        }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-//@Service
-//public class TeacherService {
-//
-//    private final TeacherRepository teacherRepository;
-//
-//    public TeacherService(TeacherRepository teacherRepository) {
-//        this.teacherRepository = teacherRepository;
-//    }
-//
-//    // ID
-//    public Optional<Teacher> getTeacherById(Long id) {
-//        Optional<TeacherEntity> teacherEntityOpt = teacherRepository.findById(id);
-//
-//        if (teacherEntityOpt.isPresent()) {
-//            TeacherEntity entity = teacherEntityOpt.get();
-//
-//            List<Student> studentList = new ArrayList<>();
-//            if (entity.getStudents() != null) {
-//                entity.getStudents().forEach(s -> {
-//                    Student student = new Student(s.getId(), s.getName(), s.getScore(), s.getEmail(), Collections.emptyList());
-//                    studentList.add(student);
-//                });
-//            }
-//
-//            Teacher teacher = new Teacher(
-//                    entity.getId(),
-//                    entity.getName(),
-//                    entity.getSubject(),
-//                    entity.getAge(),
-//                    studentList
-//            );
-//
-//            return Optional.of(teacher);
-//        }
-//
-//        return Optional.empty();
-//    }
-//}

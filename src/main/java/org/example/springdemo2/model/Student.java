@@ -1,15 +1,13 @@
 package org.example.springdemo2.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
-import org.example.springdemo2.entity.TeacherEntity;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @ToString(exclude = "teachers")
 @EqualsAndHashCode(exclude = "teachers")
 public class Student {
