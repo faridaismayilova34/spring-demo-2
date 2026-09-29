@@ -13,6 +13,7 @@ import java.util.List;
 public class Teacher {
     private Long id;
     private String name;
-
+    private String subject;
+    private Integer age;
     private List<Student> students;
 }
