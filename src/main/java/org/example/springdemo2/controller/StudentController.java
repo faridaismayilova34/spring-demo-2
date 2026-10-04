@@ -19,9 +19,7 @@ public class StudentController {
     // 1. GET: ID
     @GetMapping("/{id}")
     public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
-        return studentService.getStudentById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(studentService.getStudentById(id));
     }
 
     // 2. PUT:

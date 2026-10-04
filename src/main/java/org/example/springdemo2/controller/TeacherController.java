@@ -18,8 +18,6 @@ public class TeacherController {
     // GET: ID
     @GetMapping("/{id}")
     public ResponseEntity<Teacher> getTeacherById(@PathVariable Long id) {
-        return teacherService.getTeacherById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(teacherService.getTeacherById(id));
     }
 }

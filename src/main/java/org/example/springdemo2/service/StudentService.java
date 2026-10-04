@@ -2,6 +2,8 @@ package org.example.springdemo2.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.springdemo2.entity.StudentEntity;
+import org.example.springdemo2.exception.StudentNotFoundException;
 import org.example.springdemo2.mapper.StudentMapper;
 import org.example.springdemo2.model.Student;
 import org.example.springdemo2.repository.StudentRepository;
@@ -19,55 +21,45 @@ public class StudentService {
     private final StudentMapper studentMapper;
 
     @Transactional(readOnly = true)
-    public Optional<Student> getStudentById(Long id) {
-        log.info("getStudentById start - id: {}", id);
-        try {
-            Optional<Student> student = studentRepository.findById(id)
-                    .map(studentMapper::toDto);
+    public Student getStudentById(Long id) {
+        log.info("getStudentById started with id: {}", id);
 
-            if (student.isEmpty()) {
-                log.warn("getStudentById - Student not found with id: {}", id);
-            }
+        StudentEntity studentEntity = studentRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Student not found with id: {}", id);
+                    return new StudentNotFoundException("Student not found with id: " + id);
+                });
 
-            log.info("getStudentById end - id: {}", id);
-            return student;
-        } catch (Exception e) {
-            log.error("getStudentById error - id: {}, message: {}", id, e.getMessage(), e);
-            throw e;
-        }
+        log.info("getStudentById method finished successfully for id: {}", id);
+        return studentMapper.toDto(studentEntity);
     }
 
     public Student updateStudent(Long id, Student studentRequest) {
-        log.info("updateStudent start - id: {}", id);
-        try {
-            Student updatedStudent = studentRepository.findById(id)
-                    .map(existingEntity -> {
-                        studentMapper.updateEntityFromDto(studentRequest, existingEntity);
-                        var savedEntity = studentRepository.save(existingEntity);
-                        return studentMapper.toDto(savedEntity);
-                    })
-                    .orElseThrow(() -> {
-                        log.error("updateStudent error - Student not found with id: {}", id);
-                        return new RuntimeException("Student not found with id: " + id);
-                    });
+        log.info("updateStudent method started with id: {}, Student: {}", id, studentRequest);
 
-            log.info("updateStudent end - id: {}", id);
-            return updatedStudent;
-        } catch (Exception e) {
-            log.error("updateStudent error - Exception occurred: {}", e.getMessage(), e);
-            throw e;
-        }
+        StudentEntity studentEntity = studentRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Student not found with this id: {}", id);
+                    return new StudentNotFoundException("Student not found with this id: " + id);
+                });
+
+        studentMapper.updateEntityFromDto(studentRequest, studentEntity);
+        StudentEntity savedEntity = studentRepository.save(studentEntity);
+
+        log.info("updateStudent method finished successfully for id: {}, Student: {}", id, studentRequest);
+        return studentMapper.toDto(savedEntity);
     }
 
     public void deleteStudent(Long id) {
-        log.info("deleteStudent start - id: {}", id);
-        try {
-            studentRepository.deleteById(id);
-            log.info("deleteStudent end - id: {}", id);
-        } catch (Exception e) {
-            log.error("deleteStudent error - id: {}, message: {}", id, e.getMessage(), e);
-            throw e;
-        }
+        log.info("removeStudent method started with id: {}", id);
+
+        StudentEntity studentEntity = studentRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Student not found with this id: {}", id);
+                    return new StudentNotFoundException("Student not found with this id: " + id);
+                });
+
+        studentRepository.delete(studentEntity);
+        log.info("removeStudent method finished successfully with id: {}", id);
     }
 }
-
